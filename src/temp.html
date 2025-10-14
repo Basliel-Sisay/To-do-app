@@ -26,5 +26,25 @@
         <div class="detail-content">
         </div>
     </div>
+    <dialog id="dialog">
+        <form id="form" method="dialog">
+            <label for="tit">Task Title:</label>
+            <input type="text" id="tit" name="title of the task" placeholder="Enter task title" required>
+            <label for="desc">Description:</label>
+            <input type="text" id="desc" name="Description for the task to be done" placeholder="Enter description" required>
+            <label for="date">Due Date:</label>
+            <input type="text" id="date" pattern="\d{2}/\d{2}/\d{4}" name="Date for the task to be compelted" placeholder="DD/MM/YYYY" >
+            <select>
+                <option value="High">High</option>
+                <option value="Medium">Medium</option>
+                <option value="low">low</option>
+            </select>
+            <div class="dialog-buttons">
+                <button type="submit" id="save">Save</button>
+                <button type="button" id="delete">Delete</button>
+                <button type="button" id="close">Close</button>
+            </div>
+        </form>
+    </dialog>
 </body>
 </html>
