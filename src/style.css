@@ -20,9 +20,11 @@ body{
     display: flex;
     flex-direction: column;
 }
-.sidebar h2{
+.sidebar h1{
     margin-bottom: 20px;
     color: rgb(236, 240, 241);
+    border-bottom: 2px solid rgb(63, 89, 116);
+    padding-bottom: 16px;
 }
 .projects-list{
     flex-grow: 1;
@@ -77,6 +79,8 @@ body{
 }
 #add-button:hover{
     background-color: rgb(33, 154, 82);
+    transform: translateY(-2px);
+    transition: all 0.3s ease;
 }
 #detail.hidden{
     display: none;
