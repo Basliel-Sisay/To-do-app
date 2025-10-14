@@ -7,8 +7,52 @@ export class dom{
         this.container= document.querySelector('.todo-container');
         this.addList= document.querySelector('#add-button');
         this.addNew= document.querySelector('#add');
+        this.dialog = document.querySelector('#dialog');
+        this.fixedTodo = null;
+        this.form = document.querySelector('#form');
+        this.deleteButton = document.querySelector('#delete');
+        this.closeButton = document.querySelector('#close');
+        this.saveButton = document.querySelector('#save');
+        this.titleInput = document.querySelector('#tit');
+        this.descInput = document.querySelector('#desc');
+        this.dateInput = document.querySelector('#date');
+        this.prioritySelect = document.querySelector('#select');
+        this.detailOverlay = document.querySelector('#detail');
+    }
+    openDialog(){
+        if (!this.dialog) return;
+        this.dialog.style.removeProperty('display');
+        try{
+            if (!this.dialog.open) this.dialog.showModal();
+        }catch(_){
+            this.dialog.setAttribute('open','');
+        }
+        if (typeof this.dialog.focus === 'function') this.dialog.focus();
+    }
+    closeAndResetDialog(){
+        if (this.dialog && this.dialog.open) {
+            try { this.dialog.close(); } catch (_) {}
+        }
+        if (this.detailOverlay && !this.detailOverlay.classList.contains('hidden')) {
+            this.detailOverlay.classList.add('hidden');
+        }
+        this.resetFormState();
+        if (document.activeElement && typeof document.activeElement.blur === 'function') {
+            document.activeElement.blur();
+        }
+    }
+    resetFormState(){
+        if (this.form) {
+            this.form.reset();
+        }
+        if (this.titleInput) this.titleInput.value = '';
+        if (this.descInput) this.descInput.value = '';
+        if (this.dateInput) this.dateInput.value = '';
+        if (this.prioritySelect) this.prioritySelect.value = 'Medium';
+        this.fixedTodo = null;
     }
     displayProjects(){
+        this.list.innerHTML='';
         this.controller.projects.forEach(li => {
             const Projectlist = document.createElement('p');
             const projs = document.createElement('div');
@@ -53,7 +97,11 @@ export class dom{
         });
     }
     displayList(){
-        this.controller.active.todoList.forEach(elt=>{
+        this.container.innerHTML='';
+        if(!this.controller.active){
+            return;
+        }
+        this.controller.active.todoList.forEach((elt)=>{
             const todo = document.createElement('div');
             const titles = document.createElement('h3');
             const desc = document.createElement('p');
@@ -98,12 +146,21 @@ export class dom{
                 todo.style.transform = 'translateY(0)';
                 todo.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)';
             });
+            todo.addEventListener('click', (e)=>{
+                e.preventDefault();
+                document.querySelector('#tit').value = elt.title;
+                document.querySelector('#desc').value = elt.description;
+                document.querySelector('#date').value = elt.DueDate;
+                document.querySelector('#select').value = elt.priority;
+                this.fixedTodo = elt;
+                this.openDialog();
+              });
             todo.appendChild(titles);
             todo.appendChild(desc);
             todo.appendChild(date);
             todo.appendChild(priorities);
             this.container.appendChild(todo);
-        })
+        });
     }
     listener(){
         this.addNew.addEventListener('click', ()=>{
@@ -116,14 +173,104 @@ export class dom{
         });
         this.addList.addEventListener('click', ()=>{
             if(this.controller.active){
-                const title = prompt('Enter the title');
-                const description = prompt('Enter Description ');
-                const DueDate = prompt('Enter the Due Date for the task(Please enter a valid date in G.C) ');
-                const priority = prompt('Enter the level of priority you give for this project (high, medium or low) ');
-                const newList = new Todo(title, description, DueDate, priority);
-                this.controller.active.add(newList);
-                this.displayList();
+                this.resetFormState();
+                if (this.dialog) {
+                    this.openDialog();
+                    if (typeof this.dialog.focus === 'function') {
+                        this.dialog.focus();
+                    }
+                }
             }
+        });
+        const form = this.form;
+        const deleted = this.deleteButton;
+        const close = this.closeButton;
+        if (this.saveButton){
+            this.saveButton.addEventListener('click', (evt)=>{
+                evt.preventDefault();
+                if (!this.controller.active){
+                    // Create a default project automatically if none selected
+                    const fallbackProject = new project('My Tasks');
+                    this.controller.create(fallbackProject);
+                }
+                const titler = this.titleInput.value; 
+                const descriptions = this.descInput.value;
+                const Due_Date = this.dateInput.value;
+                const priority = this.prioritySelect.value;
+                if (this.fixedTodo) {
+                    this.fixedTodo.title = titler;
+                    this.fixedTodo.description = descriptions;
+                    this.fixedTodo.DueDate = Due_Date;
+                    this.fixedTodo.priority = priority;
+                } else {
+                    const newTodo = new Todo(titler, descriptions, Due_Date, priority);
+                    this.controller.active.add(newTodo);
+                }
+                this.displayList();
+                this.closeAndResetDialog();
+            });
+        }
+        if (form){
+            form.addEventListener('submit', (e)=>{
+                // Fallback: if a browser triggers form submit (e.g., Enter), close without saving
+                e.preventDefault();
+                const submitter = e.submitter;
+                const isSave = submitter && submitter.id === 'save';
+                if (!isSave){
+                    this.closeAndResetDialog();
+                }
+            });
+        }
+            deleted && deleted.addEventListener('click', ()=>{
+                if (this.controller.active && this.fixedTodo) {
+                   this.controller.active.remove(this.fixedTodo.id);
+                   this.fixedTodo= null;
+                   this.displayList();
+                   this.displayProjects();
+                }
+                this.closeAndResetDialog();
+            });
+            if (close) {
+                close.addEventListener('click', (evt)=>{
+                    evt.stopPropagation();
+                    evt.preventDefault();
+                    this.closeAndResetDialog();
+                });
+            }
+        // Delegated handler inside the dialog as a fallback
+        if (this.dialog){
+            this.dialog.addEventListener('click', (evt) => {
+                const target = evt.target;
+                if (target && (target.id === 'close' || (target.closest && target.closest('#close')))) {
+                    evt.stopPropagation();
+                    this.closeAndResetDialog();
+                }
+            });
+        }
+        // Allow ENTER or ESC to close the dialog (ENTER closes without saving)
+        if (this.dialog){
+            this.dialog.addEventListener('keydown', (evt) => {
+                if (evt.key === 'Enter'){
+                    evt.preventDefault();
+                    this.closeAndResetDialog();
+                    return;
+                }
+                if (evt.key === 'Escape') {
+                    this.closeAndResetDialog();
+                }
+            });
+        }
+        document.addEventListener('keydown', (evt) => {
+            if (evt.key === 'Escape' && this.dialog && this.dialog.open) {
+                this.closeAndResetDialog();
+            }
+        });
+        this.dialog.addEventListener('close', () => {
+            this.resetFormState();
+        });
+        this.dialog.addEventListener('cancel', () => {
+            this.resetFormState();
         });
     }
 }
+
