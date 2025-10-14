@@ -27,14 +27,14 @@
         </div>
     </div>
     <dialog id="dialog">
-        <form id="form" method="dialog">
+        <form id="form" autocomplete="off" novalidate>
             <label for="tit">Task Title:</label>
-            <input type="text" id="tit" name="title of the task" placeholder="Enter task title" required>
+            <input type="text" id="tit" name="title of the task" placeholder="Enter task title" required autocomplete="off">
             <label for="desc">Description:</label>
-            <input type="text" id="desc" name="Description for the task to be done" placeholder="Enter description" required>
+            <input type="text" id="desc" name="Description for the task to be done" placeholder="Enter description" required autocomplete="off">
             <label for="date">Due Date:</label>
-            <input type="text" id="date" pattern="\d{2}/\d{2}/\d{4}" name="Date for the task to be compelted" placeholder="DD/MM/YYYY" >
-            <select>
+            <input type="text" id="date" pattern="\d{2}/\d{2}/\d{4}" name="Date for the task to be compelted" placeholder="DD/MM/YYYY" autocomplete="off">
+            <select id="select">
                 <option value="High">High</option>
                 <option value="Medium">Medium</option>
                 <option value="low">low</option>
@@ -42,9 +42,11 @@
             <div class="dialog-buttons">
                 <button type="submit" id="save">Save</button>
                 <button type="button" id="delete">Delete</button>
-                <button type="button" id="close">Close</button>
             </div>
         </form>
+        <div class="dialog-buttons">
+            <button type="button" id="close">Close</button>
+        </div>
     </dialog>
 </body>
 </html>
