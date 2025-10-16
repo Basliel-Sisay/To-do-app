@@ -20,6 +20,9 @@ export class dom{
         this.prioritySelect = document.querySelector('#select');
         this.detailOverlay = document.querySelector('#detail');
         this.storage =stored;
+        this.projectDialog = document.querySelector('#projectDialog');
+        this.projectForm = document.querySelector('#projectForm');
+        this.cancelProject = document.querySelector('#cancelProject');
     }
     openDialog(){
         if (!this.dialog) return;
@@ -125,7 +128,6 @@ export class dom{
             this.displayList();
             this.storage.save(this.controller);
         });
-
             projs.appendChild(deleteButtons);
             projs.appendChild(Projectlist);
             projs.appendChild(projsNumber);
@@ -199,14 +201,24 @@ export class dom{
         });
     }
     listener(){
-        this.addNew.addEventListener('click', ()=>{
-            const task= prompt('Enter your project name');
-            if(task){
-                const newTask = new project(task);
+        this.addNew.addEventListener('click', () => {
+            this.projectDialog.showModal();
+        });
+        this.projectForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const projectName = document.querySelector('#projectName').value;
+            if(projectName){
+                const newTask = new project(projectName);
                 this.controller.create(newTask);
                 this.displayProjects();
                 this.storage.save(this.controller);
+                this.projectDialog.close();
+                this.projectForm.reset();
             }
+        });
+        this.cancelProject.addEventListener('click', () => {
+            this.projectDialog.close();
+            this.projectForm.reset();
         });
         this.addList.addEventListener('click', ()=>{
             if(this.controller.active){
