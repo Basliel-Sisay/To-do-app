@@ -41,11 +41,11 @@ src/
 ├── index.js             # Application entry point
 ├── temp.html            # Main HTML template
 ├── style.css            # Comprehensive styling
-│   ├── todo.js          # Todo class and logic
-│   ├── project.js       # Project class and management
-│   ├── dom.js           # DOM manipulation and UI
-│   ├── controller.js    # Application state management
-│   └── storage.js       # LocalStorage persistence
+├── todo.js              # Todo class and logic
+├── project.js           # Project class and management
+├── dom.js               # DOM manipulation and UI
+├── controller.js        # Application state management
+└── storage.js           # LocalStorage persistence
 </pre>
 
 <h2>Core Components</h2>
@@ -191,3 +191,4 @@ Project Link: https://github.com/Basliel-Sisay/To-do-app.git
 
 
 ⭐ Star this repo if you found it helpful!
+
