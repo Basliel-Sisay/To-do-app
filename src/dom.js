@@ -1,7 +1,8 @@
 import { project} from "./projects.js";
+import { storage } from "./storage.js";
 import { Todo} from "./todo.js";
 export class dom{
-    constructor(control){
+    constructor(control, stored){
         this.controller = control;
         this.list = document.querySelector('.projects-list');
         this.container= document.querySelector('.todo-container');
@@ -18,6 +19,7 @@ export class dom{
         this.dateInput = document.querySelector('#date');
         this.prioritySelect = document.querySelector('#select');
         this.detailOverlay = document.querySelector('#detail');
+        this.storage =stored;
     }
     openDialog(){
         if (!this.dialog) return;
@@ -91,6 +93,40 @@ export class dom{
                 this.controller.check(li.id);
                 this.displayList();
             });
+            const deleteButtons = document.createElement('button');
+            deleteButtons.textContent = 'x';
+            deleteButtons.style.background = 'transparent';
+            deleteButtons.style.color = 'rgb(255, 255, 255)';
+            deleteButtons.style.border = '1px solid rgb(255, 255, 255)';
+            deleteButtons.style.borderRadius = '50%';
+            deleteButtons.style.width = '24px';
+            deleteButtons.style.height = '24px';
+            deleteButtons.style.cursor = 'pointer';
+            deleteButtons.style.marginLeft = '10px';
+            deleteButtons.style.fontSize = '16px';
+            deleteButtons.style.fontWeight = 'bold';
+            deleteButtons.style.display = 'flex';
+            deleteButtons.style.alignItems = 'center';
+            deleteButtons.style.justifyContent = 'center';
+            deleteButtons.style.transition = 'all 0.2s ease';
+            deleteButtons.addEventListener('mouseenter', () => {
+              deleteButtons.style.background = 'rgb(255, 255, 255)';
+              deleteButtons.style.color = 'rgb(231, 76, 60)';
+        });
+
+           deleteButtons.addEventListener('mouseleave', () => {
+             deleteButtons.style.background = 'transparent';
+             deleteButtons.style.color = 'rgb(255, 255, 255)';
+        });
+        deleteButtons.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.controller.remove(li.id);
+            this.displayProjects();
+            this.displayList();
+            this.storage.save(this.controller);
+        });
+
+            projs.appendChild(deleteButtons);
             projs.appendChild(Projectlist);
             projs.appendChild(projsNumber);
             this.list.appendChild(projs);
@@ -169,6 +205,7 @@ export class dom{
                 const newTask = new project(task);
                 this.controller.create(newTask);
                 this.displayProjects();
+                this.storage.save(this.controller);
             }
         });
         this.addList.addEventListener('click', ()=>{
@@ -189,7 +226,6 @@ export class dom{
             this.saveButton.addEventListener('click', (evt)=>{
                 evt.preventDefault();
                 if (!this.controller.active){
-                    // Create a default project automatically if none selected
                     const fallbackProject = new project('My Tasks');
                     this.controller.create(fallbackProject);
                 }
@@ -208,11 +244,11 @@ export class dom{
                 }
                 this.displayList();
                 this.closeAndResetDialog();
+                this.storage.save(this.controller);
             });
         }
         if (form){
             form.addEventListener('submit', (e)=>{
-                // Fallback: if a browser triggers form submit (e.g., Enter), close without saving
                 e.preventDefault();
                 const submitter = e.submitter;
                 const isSave = submitter && submitter.id === 'save';
@@ -227,49 +263,36 @@ export class dom{
                    this.fixedTodo= null;
                    this.displayList();
                    this.displayProjects();
+                   this.storage.save(this.controller);
                 }
                 this.closeAndResetDialog();
+                this.storage.save(this.controller);
             });
             if (close) {
                 close.addEventListener('click', (evt)=>{
                     evt.stopPropagation();
                     evt.preventDefault();
                     this.closeAndResetDialog();
+                    this.storage.save(this.controller);
                 });
             }
-        // Delegated handler inside the dialog as a fallback
         if (this.dialog){
             this.dialog.addEventListener('click', (evt) => {
                 const target = evt.target;
                 if (target && (target.id === 'close' || (target.closest && target.closest('#close')))) {
                     evt.stopPropagation();
                     this.closeAndResetDialog();
+                    this.storage.save(this.controller);
                 }
             });
         }
-        // Allow ENTER or ESC to close the dialog (ENTER closes without saving)
-        if (this.dialog){
-            this.dialog.addEventListener('keydown', (evt) => {
-                if (evt.key === 'Enter'){
-                    evt.preventDefault();
-                    this.closeAndResetDialog();
-                    return;
-                }
-                if (evt.key === 'Escape') {
-                    this.closeAndResetDialog();
-                }
-            });
-        }
-        document.addEventListener('keydown', (evt) => {
-            if (evt.key === 'Escape' && this.dialog && this.dialog.open) {
-                this.closeAndResetDialog();
-            }
-        });
         this.dialog.addEventListener('close', () => {
             this.resetFormState();
+            this.storage.save(this.controller);
         });
         this.dialog.addEventListener('cancel', () => {
             this.resetFormState();
+            this.storage.save(this.controller);
         });
     }
 }
