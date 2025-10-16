@@ -1,4 +1,4 @@
-import { controller } from "./controller";
+//import { controller } from "./controller";
 
 export class storage{
    save(controller){
@@ -14,5 +14,12 @@ export class storage{
         activeProject: activeId
     };
     localStorage.setItem('ToDoAppStore' , JSON.stringify(store));
+   }
+   load(){
+    const saved = localStorage.getItem('ToDoAppStore');
+    if(!saved){
+        return null;
+    }
+    return JSON.parse(saved);
    }
 }
