@@ -7,10 +7,13 @@ body{
     font-family: Arial, sans-serif;
     height: 100vh;
     background-color: rgb(243, 241, 245);
+    height: 100%;
 }
 .app-container{
     display: flex;
-    height: 100vh;
+    min-height: 100vh; 
+    align-items: stretch;
+    
 }
 .sidebar{
     width: 300px;
@@ -19,6 +22,9 @@ body{
     padding: 20px;
     display: flex;
     flex-direction: column;
+    min-height: 100vh;
+    height: auto; 
+    overflow-y: auto;
 }
 .sidebar h1{
     margin-bottom: 20px;
@@ -115,7 +121,7 @@ body{
     max-height: 80vh;
     overflow: auto;
     font-family: Arial, sans-serif;
-    display: none; /* hidden by default; shown only when [open] */
+    display: none; 
     flex-direction: column;
     gap: 15px;
     position: fixed;
@@ -123,7 +129,6 @@ body{
     left: 50%;
     transform: translate(-50%, -50%);
 }  
-/* Only display dialog when it has [open] */
 #dialog[open]{
     display: flex;
 }
